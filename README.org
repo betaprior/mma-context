@@ -17,12 +17,17 @@ easily access this private context from other notebooks.
 To load a package in Mathematica, execute the following in the front end:
 
 : AppendTo[$Path, "/path/to/package/dir"];
-: (or AppendTo[$Path, "c:\\path\\to\\package\\dir"] if in Windows)
-: Needs["PackageName`"]; (don't forget the backquote)
+: Needs["PackageName`"]; (* don't forget the backquote *)
+
+Note: under Windows, the path will involve double backslashes, e.g.
+
+: AppendTo[$Path, "c:\\path\\to\\package\\dir"]
+
 
 To autoload the package, append the above lines to init.m in 
 : $UserBaseDirectory/Autoload/Kernel/init.m
-e.g. /home/leo/.Mathematica/Autoload/Kernel/init.m
+e.g. ~/home/leo/.Mathematica/Autoload/Kernel/init.m~
+
 (To obtain exact location of $UserBaseDirectory, evaluate $UserBaseDirectory
 in mma.)
 
@@ -39,9 +44,7 @@ e.g. =?setPrivate= in the notebook.
 
 ** setPrivate
 
-Usage: 
-
-*setPrivate[]*
+Usage: =setPrivate[]=
 
 Creates a private context by calling =SetOptions[EvaluationNotebook[],
 CellContext -> Notebook]= and replaces the "setPrivate" notebook input string
@@ -49,16 +52,14 @@ with the "SetOptions..." command string.
 
 Resultant assigned context can be checked via =$Context= or =$ContextPath=.
 
-*setPrivate["foo`"] or setPrivate[{"foo`","bar`"}]*
+Alternative forms: *setPrivate["foo`"] or setPrivate[{"foo`","bar`"}]*
 
 Functions as above, but adds contexts "foo`" or "foo`", "bar`" to the
 =$ContextPath=.
 
 ** spawnScratch
 
-Usage:
-
-*spawnScratch[]*
+Usage: =spawnScratch[]=
 
 Opens a new notebook with a private context, but its =$ContextPath= will
 include the context of the invoking notebook (i.e. the notebook where
@@ -70,19 +71,42 @@ saved.
 
 ** setAutosave
 
-Usage:
-
-*setAutosave[]* or *setAutosave[True]* 
-
-*setAutosave[False]*
+Usage: =setAutosave[]= or =setAutosave[True]=; =setAutosave[False]=
 
 This is a convenience wrapper around
 =SetOptions[SelectedNotebook[],NotebookAutoSave->True|False]=.
 
 ** ExposeContexts
 
-Usage:
-
-*ExposeContexts[{"foo`","bar`"}]
+Usage: =ExposeContexts[{"foo`","bar`"}]=
 
 Appends contexts to =$ContextPath=.
+
+* Fancy autoreplacement hack
+
+In my Mathematica installations, I invoke the above functions by typing
+=_private= (which automatically expands to =setPrivate[]=) and =_scratch=
+(which automatically expands to =spawnScratch[]=).  This is accomplished by
+tapping into the InputAutoReplacements mechanism that is ordinarily
+responsible for replacing ~->~, ~:>~, etc. with fancy arrows in notebooks.
+Below are my notes on how I set it up.  Instructions are provided
+as is; use them at your own risk, and make sure to back up any system files if you choose
+to modify them :)
+
+: Go to Format->Edit Stylesheet
+: This will pull up a notebook of sorts.  Copy the following Cell[] code:
+: Cell[StyleData["StandardForm"],
+: InputAutoReplacements->{
+: "_private" -> "setPrivate[]","_scratch" -> "spawnScratch[]",
+: "->" -> "\[Rule]", ":>" -> "\[RuleDelayed]", "<=" -> "\[LessEqual]", ">=" ->
+: "\[GreaterEqual]", "!=" -> "\[NotEqual]", "==" -> "\[Equal]", ParentList}]
+: 
+: Paste the above cell (you can make other additions) into that
+: style-editing notebook thing.  Click "Install"; choose a filename.  That
+: name will now show up in the Stylesheets menu.  To apply this as a default,
+: choose the name of an existing stylesheet (like Default.nb).  After
+: restart, the autoreplacements will work for all notebooks using that
+: stylesheet.  (Under linux, should have a file under
+: /home/leo/.Mathematica/SystemFiles/FrontEnd/StyleSheets/Default.nb.  Check
+: that this file is present, correctly named, and has the necessary code if
+: problems arise.)

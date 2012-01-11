@@ -41,9 +41,6 @@ setPrivate[exposedCtxts : ({__String} | Null) : Null]:=
 
 setPrivate[x_String]:=setPrivate[{x}];
 setPrivate[x_Integer]:= setPrivate["Notebook$$" <> ToString[x] <> "`"];
-setAutosave[] := setAutosave[True];
-setAutosave[True] := SetOptions[EvaluationNotebook[],NotebookAutoSave->True];
-setAutosave[False] := SetOptions[EvaluationNotebook[],NotebookAutoSave->False];
 
 
 SetAttributes[SelfDestruct, HoldAllComplete];
@@ -66,6 +63,12 @@ spawnScratch[] := SelfDestruct@Module[{nb,boxExpr,strList},
     nb = CreateDocument[];
     writeAndEval[nb,boxExpr];
 ]
+
+
+setAutosave[] := setAutosave[True];
+setAutosave[True] := SetOptions[EvaluationNotebook[],NotebookAutoSave->True];
+setAutosave[False] := SetOptions[EvaluationNotebook[],NotebookAutoSave->False];
+
 
 (* TODO: make sure context path order is sensible (e.g. wrt system context) when adding
   new elements to the path *)
