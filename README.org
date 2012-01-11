@@ -1,0 +1,88 @@
+* Project information
+
+This package provides convenience functions for easier Mathematica context
+management. Mathematica's namespace is, by default, global and shared across
+notebooks. This, in most cases, is very inconvenient and can easily lead to
+errors.  See [[http://stackoverflow.com/a/4897013/133234][this StackOverflow post]] for discussion of these issues.
+
+It is recommended that every notebook is set to use a separate namespace.
+This is ordinarily accomplished via =SetOptions[EvaluationNotebook[],
+CellContext -> Notebook]=.  
+
+This package provides a wrapper around this function, as well as a way to
+easily access this private context from other notebooks.
+
+* Mathematica package installation
+
+To load a package in Mathematica, execute the following in the front end:
+
+: AppendTo[$Path, "/path/to/package/dir"];
+: (or AppendTo[$Path, "c:\\path\\to\\package\\dir"] if in Windows)
+: Needs["PackageName`"]; (don't forget the backquote)
+
+To autoload the package, append the above lines to init.m in 
+: $UserBaseDirectory/Autoload/Kernel/init.m
+e.g. /home/leo/.Mathematica/Autoload/Kernel/init.m
+(To obtain exact location of $UserBaseDirectory, evaluate $UserBaseDirectory
+in mma.)
+
+* How to use these functions
+
+The package provides the following functions:
+- =setPrivate=
+- =spawnScratch=
+- =setAutosave=
+- =ExposeContexts=
+
+Docstrings can be accessed from Mathematica in the usual manner by entering
+e.g. =?setPrivate= in the notebook.
+
+** setPrivate
+
+Usage: 
+
+*setPrivate[]*
+
+Creates a private context by calling =SetOptions[EvaluationNotebook[],
+CellContext -> Notebook]= and replaces the "setPrivate" notebook input string
+with the "SetOptions..." command string.
+
+Resultant assigned context can be checked via =$Context= or =$ContextPath=.
+
+*setPrivate["foo`"] or setPrivate[{"foo`","bar`"}]*
+
+Functions as above, but adds contexts "foo`" or "foo`", "bar`" to the
+=$ContextPath=.
+
+** spawnScratch
+
+Usage:
+
+*spawnScratch[]*
+
+Opens a new notebook with a private context, but its =$ContextPath= will
+include the context of the invoking notebook (i.e. the notebook where
+"spawnScratch" was entered). The "spawnScratch[]" command cell will disappear
+from the invoking notebook so as not to pollute the workspace.  This is
+extremely convenient when one wants to perform throw-away calculations with
+the current notebook's symbols.  The scratch notebook can, of course, be
+saved.
+
+** setAutosave
+
+Usage:
+
+*setAutosave[]* or *setAutosave[True]* 
+
+*setAutosave[False]*
+
+This is a convenience wrapper around
+=SetOptions[SelectedNotebook[],NotebookAutoSave->True|False]=.
+
+** ExposeContexts
+
+Usage:
+
+*ExposeContexts[{"foo`","bar`"}]
+
+Appends contexts to =$ContextPath=.
